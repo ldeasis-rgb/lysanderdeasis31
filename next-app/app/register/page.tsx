@@ -130,7 +130,7 @@ export default function RegisterPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -142,7 +142,7 @@ export default function RegisterPage() {
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="••••••••"
+                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                 value={confirmPassword}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setConfirmPassword(e.target.value)

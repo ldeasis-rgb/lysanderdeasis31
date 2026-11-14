@@ -110,7 +110,7 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="��������"
+                placeholder="ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"
                 value={password}
                 onChange={(e: ChangeEvent<HTMLInputElement>) =>
                   setPassword(e.target.value)
