@@ -8,11 +8,11 @@ import {
 } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
-import { isAuthenticated, setToken } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { api } from "../next-app/lib/api";
+import { isAuthenticated, setToken } from "../next-app/lib/auth";
+import { Button } from "../next-app/components/ui/button";
+import { Input } from "../next-app/components/ui/input";
+import { Label } from "../next-app/components/ui/label";
 import {
   Card,
   CardContent,
@@ -20,7 +20,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "../next-app/components/ui/card";
 
 interface LoginResponse {
   access_token?: string;
