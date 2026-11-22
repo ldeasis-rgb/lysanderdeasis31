@@ -8,6 +8,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -16,61 +17,80 @@ export default function RegisterPage() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError("Hindi magkapareho ang password at confirm password.");
       return;
     }
 
     setLoading(true);
     try {
-      // TODO: Ilagay dito ang existing API call mo (e.g., registerUser({ fullName, email, password }))
-      console.log({ fullName, email, password });
+      // TODO: Ilagay dito ang existing API call mo (e.g., await registerUser({ fullName, email, password }))
+      console.log("Submitting:", { fullName, email, password });
     } catch (err: any) {
-      setError(err.message || "Failed to register");
+      setError(err.message || "May error sa pag-register. Subukan ulit.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-white flex items-center justify-center p-4">
+      {/* Makulay na Background Orbs (Aurora Effect) */}
+      <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-fuchsia-600/30 blur-3xl" />
+      <div className="pointer-events-none absolute top-1/2 -right-32 h-96 w-96 -translate-y-1/2 rounded-full bg-cyan-500/25 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 left-1/3 h-96 w-96 rounded-full bg-amber-500/20 blur-3xl" />
+
+      {/* Main Glass Card */}
+      <div className="relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-5 rounded-3xl border border-white/15 bg-white/5 backdrop-blur-2xl shadow-[0_20px_70px_rgba(0,0,0,0.6)] overflow-hidden">
         
-        {/* Left Side: Branding / Welcome Banner */}
-        <div className="hidden md:flex flex-col justify-between p-10 bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 text-white">
+        {/* Left Panel: Vibrant Multi-Color Feature Card (2 columns) */}
+        <div className="md:col-span-2 p-8 flex flex-col justify-between bg-gradient-to-br from-violet-600 via-fuchsia-600 to-orange-500 text-white">
           <div>
-            <span className="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-white/20 rounded-full">
-              Welcome
-            </span>
-            <h2 className="mt-6 text-3xl font-bold leading-tight">
-              Start your journey with us today.
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/25 backdrop-blur-md text-xs font-semibold tracking-wide">
+              <span className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
+              LYSANDER PORTAL
+            </div>
+
+            <h2 className="mt-6 text-3xl font-extrabold tracking-tight leading-snug">
+              Build. Connect. Level Up.
             </h2>
-            <p className="mt-3 text-sm text-blue-100 leading-relaxed">
-              Create an account to access your dashboard, manage your records, and track everything in one place.
+            <p className="mt-3 text-sm text-white/90 leading-relaxed">
+              Gumawa ng account para ma-unlock ang iyong personalized workspace at real-time dashboard.
             </p>
           </div>
-          <div className="text-xs text-blue-100/80">
-            © {new Date().getFullYear()} Lysander Project. All rights reserved.
+
+          <div className="mt-8 space-y-3 text-xs text-white/90">
+            <div className="flex items-center gap-2.5 bg-white/15 rounded-xl p-3 backdrop-blur-sm">
+              <span className="text-base">⚡</span>
+              <span>Mabilis at secure na account access</span>
+            </div>
+            <div className="flex items-center gap-2.5 bg-white/15 rounded-xl p-3 backdrop-blur-sm">
+              <span className="text-base">🎨</span>
+              <span>Modern cloud-ready interface</span>
+            </div>
           </div>
         </div>
 
-        {/* Right Side: Registration Form */}
-        <div className="p-8 sm:p-10">
+        {/* Right Panel: Form Inputs (3 columns) */}
+        <div className="md:col-span-3 p-8 sm:p-10 bg-slate-950/60">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-white">Create an Account</h1>
-            <p className="text-sm text-slate-400 mt-1">
-              Fill in your details below to get started
+            <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
+              Create an Account
+            </h1>
+            <p className="text-sm text-slate-300 mt-1">
+              Fill in your details below to register
             </p>
           </div>
 
           {error && (
-            <div className="mb-5 p-3.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-              {error}
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-sm flex items-center gap-2">
+              <span>⚠️</span>
+              <span>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-cyan-300 mb-1.5">
                 Full Name
               </label>
               <input
@@ -78,66 +98,78 @@ export default function RegisterPage() {
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Juan Dela Cruz"
-                className="w-full px-4 py-2.5 rounded-lg bg-slate-800/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="Lysander De Asis"
+                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-500/30 transition"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1.5">
-                Email Address
+              <label className="block text-xs font-semibold uppercase tracking-wider text-fuchsia-300 mb-1.5">
+                Email
               </label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full px-4 py-2.5 rounded-lg bg-slate-800/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="lysander@example.com"
+                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 transition"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1.5">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-amber-300">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-xs text-slate-400 hover:text-white transition cursor-pointer"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-2.5 rounded-lg bg-slate-800/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="••••••••••••"
+                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/30 transition"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-emerald-300 mb-1.5">
                 Confirm Password
               </label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-2.5 rounded-lg bg-slate-800/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                placeholder="••••••••••••"
+                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30 transition"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 px-4 mt-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold shadow-lg shadow-blue-600/25 transition cursor-pointer"
+              className="w-full py-3 px-4 mt-2 rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-orange-400 disabled:opacity-50 text-white font-bold tracking-wide shadow-lg shadow-fuchsia-600/30 transition-all transform hover:-translate-y-0.5 cursor-pointer"
             >
-              {loading ? "Creating account..." : "Create Account"}
+              {loading ? "Creating Account..." : "Register Now →"}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-slate-400">
             Already have an account?{" "}
-            <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium">
-              Sign in
+            <Link
+              href="/login"
+              className="font-semibold text-cyan-400 hover:text-cyan-300 underline underline-offset-4"
+            >
+              Login here
             </Link>
           </p>
         </div>
