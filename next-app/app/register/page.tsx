@@ -1,50 +1,17 @@
 "use client";
 
-import {
-  type ChangeEvent,
-  type FormEvent,
-  useEffect,
-  useState,
-} from "react";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import Link from "next/link";
-import { api } from "@/lib/api";
-import { setToken, isAuthenticated } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-interface RegisterResponse {
-  access_token?: string;
-  token?: string;
-  message?: string;
-}
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [name, setName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Kung naka-login na at valid pa ang token, diretso na sa dashboard
-  useEffect(() => {
-    if (isAuthenticated()) {
-      router.replace("/dashboard");
-    }
-  }, [router]);
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -54,121 +21,127 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
-
     try {
-      // Palitan ang "/auth/register" kung iba ang register route ng backend mo (hal. "/register" o "/users")
-      const data = await api.post<RegisterResponse>("/auth/register", {
-        name,
-        email,
-        password,
-      });
-
-      // Kung nagbabalik agad ng token ang backend pagkatapos mag-register, i-auto login
-      const jwt = data?.access_token || data?.token;
-      if (jwt) {
-        setToken(jwt);
-        router.push("/dashboard");
-      } else {
-        // Kung walang token na ibinalik, dalhin sa login page para mag-sign in
-        router.push("/login");
-      }
+      // TODO: Ilagay dito ang existing API call mo (e.g., registerUser({ fullName, email, password }))
+      console.log({ fullName, email, password });
     } catch (err: any) {
-      setError(err.message || "Registration failed. Please try again.");
+      setError(err.message || "Failed to register");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Create an Account</CardTitle>
-          <CardDescription>
-            Fill in your details below to register
-          </CardDescription>
-        </CardHeader>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+        
+        {/* Left Side: Branding / Welcome Banner */}
+        <div className="hidden md:flex flex-col justify-between p-10 bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 text-white">
+          <div>
+            <span className="inline-block px-3 py-1 text-xs font-semibold tracking-wider uppercase bg-white/20 rounded-full">
+              Welcome
+            </span>
+            <h2 className="mt-6 text-3xl font-bold leading-tight">
+              Start your journey with us today.
+            </h2>
+            <p className="mt-3 text-sm text-blue-100 leading-relaxed">
+              Create an account to access your dashboard, manage your records, and track everything in one place.
+            </p>
+          </div>
+          <div className="text-xs text-blue-100/80">
+            © {new Date().getFullYear()} Lysander Project. All rights reserved.
+          </div>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            {error && (
-              <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-                {error}
-              </div>
-            )}
+        {/* Right Side: Registration Form */}
+        <div className="p-8 sm:p-10">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-white">Create an Account</h1>
+            <p className="text-sm text-slate-400 mt-1">
+              Fill in your details below to get started
+            </p>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
+          {error && (
+            <div className="mb-5 p-3.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1.5">
+                Full Name
+              </label>
+              <input
                 type="text"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
                 placeholder="Juan Dela Cruz"
-                value={name}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setName(e.target.value)
-                }
-                required
+                className="w-full px-4 py-2.5 rounded-lg bg-slate-800/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
+            <div>
+              <label className="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1.5">
+                Email Address
+              </label>
+              <input
                 type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setEmail(e.target.value)
-                }
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full px-4 py-2.5 rounded-lg bg-slate-800/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
+            <div>
+              <label className="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1.5">
+                Password
+              </label>
+              <input
                 type="password"
-                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
+                placeholder="••••••••"
+                className="w-full px-4 py-2.5 rounded-lg bg-slate-800/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
+            <div>
+              <label className="block text-xs font-medium uppercase tracking-wider text-slate-400 mb-1.5">
+                Confirm Password
+              </label>
+              <input
                 type="password"
-                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-                value={confirmPassword}
-                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                  setConfirmPassword(e.target.value)
-                }
                 required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full px-4 py-2.5 rounded-lg bg-slate-800/70 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
             </div>
-          </CardContent>
 
-          <CardFooter className="flex flex-col space-y-4 pt-4">
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Register"}
-            </Button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 px-4 mt-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-semibold shadow-lg shadow-blue-600/25 transition cursor-pointer"
+            >
+              {loading ? "Creating account..." : "Create Account"}
+            </button>
+          </form>
 
-            <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link
-                href="/login"
-                className="font-medium text-primary underline-offset-4 hover:underline"
-              >
-                Login
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
+          <p className="mt-6 text-center text-sm text-slate-400">
+            Already have an account?{" "}
+            <Link href="/login" className="text-blue-400 hover:text-blue-300 font-medium">
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
