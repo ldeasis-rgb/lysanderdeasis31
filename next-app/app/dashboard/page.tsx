@@ -2,13 +2,13 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiClient } from "../lib/api";
-import { CONFIG } from "../lib/config";
+import { apiClient } from "../../lib/api";
+import { CONFIG } from "../../lib/config";
 import {
   clearTokens,
   getUsername,
   isAuthenticated,
-} from "../lib/auth";
+} from "../../lib/auth";
 
 interface UserRecord {
   id: number;
