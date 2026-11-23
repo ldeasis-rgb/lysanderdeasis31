@@ -1,177 +1,160 @@
 "use client";
 
-import React, { useState } from "react";
-import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-export default function RegisterPage() {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://lysanderbackend2005.onrender.com";
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+export default function DashboardPage() {
+  const router = useRouter();
+  const [username, setUsername] = useState<string>("");
+  const [userId, setUserId] = useState<string | number>("");
+  const [accessToken, setAccessToken] = useState<string>("");
+  const [copied, setCopied] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
-    if (password !== confirmPassword) {
-      setError("Hindi magkapareho ang password at confirm password.");
+  useEffect(() => {
+    const token =
+      localStorage.getItem("accessToken") ||
+      localStorage.getItem("access_token") ||
+      localStorage.getItem("token");
+
+    if (!token) {
+      router.replace("/login");
       return;
     }
 
-    setLoading(true);
+    setAccessToken(token);
+
     try {
-      // TODO: Ilagay dito ang existing API call mo (e.g., await registerUser({ fullName, email, password }))
-      console.log("Submitting:", { fullName, email, password });
-    } catch (err: any) {
-      setError(err.message || "May error sa pag-register. Subukan ulit.");
+      const payloadBase64 = token.split(".")[1];
+      if (payloadBase64) {
+        const decoded = JSON.parse(atob(payloadBase64));
+        setUsername(decoded.username || decoded.name || "User");
+        setUserId(decoded.sub ?? decoded.id ?? "—");
+      }
+    } catch {
+      setUsername("User");
+    }
+  }, [router]);
+
+  const handleCopyToken = async () => {
+    if (!accessToken) return;
+    await navigator.clipboard.writeText(accessToken);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      const refreshToken =
+        localStorage.getItem("refreshToken") ||
+        localStorage.getItem("refresh_token");
+
+      if (refreshToken) {
+        await fetch(`${API_URL}/auth/logout`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        });
+      }
+    } catch {
+      // Magpapatuloy pa rin sa local logout kahit may network delay
     } finally {
-      setLoading(false);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("refresh_token");
+      router.push("/login");
     }
   };
 
+  if (!accessToken) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
+        <p className="text-slate-400 animate-pulse">Loading dashboard...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-white flex items-center justify-center p-4">
-      {/* Makulay na Background Orbs (Aurora Effect) */}
-      <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-fuchsia-600/30 blur-3xl" />
-      <div className="pointer-events-none absolute top-1/2 -right-32 h-96 w-96 -translate-y-1/2 rounded-full bg-cyan-500/25 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-32 left-1/3 h-96 w-96 rounded-full bg-amber-500/20 blur-3xl" />
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-white p-6 sm:p-10">
+      {/* Aurora Background Orbs */}
+      <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-fuchsia-600/25 blur-3xl" />
+      <div className="pointer-events-none absolute top-1/3 -right-32 h-96 w-96 rounded-full bg-cyan-500/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 left-1/3 h-96 w-96 rounded-full bg-amber-500/15 blur-3xl" />
 
-      {/* Main Glass Card */}
-      <div className="relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-5 rounded-3xl border border-white/15 bg-white/5 backdrop-blur-2xl shadow-[0_20px_70px_rgba(0,0,0,0.6)] overflow-hidden">
-        
-        {/* Left Panel: Vibrant Multi-Color Feature Card (2 columns) */}
-        <div className="md:col-span-2 p-8 flex flex-col justify-between bg-gradient-to-br from-violet-600 via-fuchsia-600 to-orange-500 text-white">
+      <div className="relative z-10 max-w-5xl mx-auto space-y-8">
+        {/* Header Bar */}
+        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-3xl border border-white/15 bg-white/5 backdrop-blur-2xl p-6 shadow-xl">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/25 backdrop-blur-md text-xs font-semibold tracking-wide">
-              <span className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
-              LYSANDER PORTAL
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              AUTHENTICATED SESSION
             </div>
-
-            <h2 className="mt-6 text-3xl font-extrabold tracking-tight leading-snug">
-              Build. Connect. Level Up.
-            </h2>
-            <p className="mt-3 text-sm text-white/90 leading-relaxed">
-              Gumawa ng account para ma-unlock ang iyong personalized workspace at real-time dashboard.
+            <h1 className="mt-3 text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
+              Welcome back, {username}!
+            </h1>
+            <p className="text-sm text-slate-300 mt-1">
+              User ID: <span className="font-mono text-cyan-300">{userId}</span> • Connected to Lysander Cloud API
             </p>
           </div>
 
-          <div className="mt-8 space-y-3 text-xs text-white/90">
-            <div className="flex items-center gap-2.5 bg-white/15 rounded-xl p-3 backdrop-blur-sm">
-              <span className="text-base">⚡</span>
-              <span>Mabilis at secure na account access</span>
-            </div>
-            <div className="flex items-center gap-2.5 bg-white/15 rounded-xl p-3 backdrop-blur-sm">
-              <span className="text-base">🎨</span>
-              <span>Modern cloud-ready interface</span>
-            </div>
+          <button
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="self-start sm:self-center px-5 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 font-semibold text-sm transition cursor-pointer disabled:opacity-50"
+          >
+            {loggingOut ? "Logging out..." : "Logout"}
+          </button>
+        </header>
+
+        {/* Status Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-xl p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-cyan-300">
+              Frontend Host
+            </p>
+            <p className="mt-2 text-lg font-bold text-white">Vercel Edge</p>
+            <p className="mt-1 text-xs text-emerald-400">● Active & Connected</p>
+          </div>
+
+          <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-xl p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-fuchsia-300">
+              Backend API
+            </p>
+            <p className="mt-2 text-lg font-bold text-white">Render NestJS</p>
+            <p className="mt-1 text-xs text-emerald-400 truncate">{API_URL}</p>
+          </div>
+
+          <div className="rounded-2xl border border-white/15 bg-white/5 backdrop-blur-xl p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-amber-300">
+              Database Engine
+            </p>
+            <p className="mt-2 text-lg font-bold text-white">Aiven MySQL</p>
+            <p className="mt-1 text-xs text-emerald-400">● JWT Auth Verified</p>
           </div>
         </div>
 
-        {/* Right Panel: Form Inputs (3 columns) */}
-        <div className="md:col-span-3 p-8 sm:p-10 bg-slate-950/60">
-          <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
-              Create an Account
-            </h1>
-            <p className="text-sm text-slate-300 mt-1">
-              Fill in your details below to register
-            </p>
-          </div>
-
-          {error && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-sm flex items-center gap-2">
-              <span>⚠️</span>
-              <span>{error}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-cyan-300 mb-1.5">
-                Full Name
-              </label>
-              <input
-                type="text"
-                required
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Lysander De Asis"
-                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-500/30 transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-fuchsia-300 mb-1.5">
-                Email
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="lysander@example.com"
-                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 transition"
-              />
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-amber-300">
-                  Password
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="text-xs text-slate-400 hover:text-white transition cursor-pointer"
-                >
-                  {showPassword ? "Hide" : "Show"}
-                </button>
-              </div>
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/30 transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-emerald-300 mb-1.5">
-                Confirm Password
-              </label>
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/30 transition"
-              />
-            </div>
-
+        {/* Token Inspector Card */}
+        <div className="rounded-3xl border border-white/15 bg-white/5 backdrop-blur-2xl p-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-200">
+              Active JWT Access Token
+            </h2>
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 px-4 mt-2 rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-orange-400 disabled:opacity-50 text-white font-bold tracking-wide shadow-lg shadow-fuchsia-600/30 transition-all transform hover:-translate-y-0.5 cursor-pointer"
+              onClick={handleCopyToken}
+              className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs font-semibold text-cyan-300 transition cursor-pointer"
             >
-              {loading ? "Creating Account..." : "Register Now →"}
+              {copied ? "Copied!" : "Copy Token"}
             </button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-slate-400">
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className="font-semibold text-cyan-400 hover:text-cyan-300 underline underline-offset-4"
-            >
-              Login here
-            </Link>
-          </p>
+          </div>
+          <div className="p-3.5 rounded-xl bg-slate-950/80 border border-white/10 font-mono text-xs text-slate-400 break-all">
+            {accessToken}
+          </div>
         </div>
       </div>
     </div>
