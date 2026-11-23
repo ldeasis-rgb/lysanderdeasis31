@@ -73,12 +73,12 @@ select:focus {
 
 button[type="submit"],
 .btn-primary {
-  background: linear-gradient(135deg, #7c3aed, #db2777, #f97316) !important;
+  background: linear-gradient(135deg, #6e49ad, #db2777, #f97316) !important;
   color: #ffffff !important;
   font-weight: 700 !important;
   border: none !important;
   border-radius: 0.75rem !important;
-  box-shadow: 0 10px 25px rgba(219, 39, 119, 0.35);
+  box-shadow: 0 10px 25px rgba(161, 73, 113, 0.35);
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
   cursor: pointer;
 }
