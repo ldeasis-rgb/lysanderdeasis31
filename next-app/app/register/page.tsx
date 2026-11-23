@@ -2,19 +2,23 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
 
 export default function RegisterPage() {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  const router = useRouter();
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     if (password !== confirmPassword) {
       setError("Hindi magkapareho ang password at confirm password.");
@@ -23,8 +27,12 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      // TODO: Ilagay dito ang existing API call mo (e.g., await registerUser({ fullName, email, password }))
-      console.log("Submitting:", { fullName, email, password });
+      const res = await api.post("/auth/register", { username, password });
+      if (res?.error) {
+        throw new Error(res.error);
+      }
+      setSuccess("Account created! Redirecting to login...");
+      setTimeout(() => router.push("/login"), 1200);
     } catch (err: any) {
       setError(err.message || "May error sa pag-register. Subukan ulit.");
     } finally {
@@ -33,7 +41,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-white flex items-center justify-center p-4">
+    <div className="relative min-h-[calc(100vh-4rem)] overflow-hidden text-white flex items-center justify-center p-4">
       {/* Makulay na Background Orbs (Aurora Effect) */}
       <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-fuchsia-600/30 blur-3xl" />
       <div className="pointer-events-none absolute top-1/2 -right-32 h-96 w-96 -translate-y-1/2 rounded-full bg-cyan-500/25 blur-3xl" />
@@ -41,8 +49,7 @@ export default function RegisterPage() {
 
       {/* Main Glass Card */}
       <div className="relative z-10 w-full max-w-4xl grid grid-cols-1 md:grid-cols-5 rounded-3xl border border-white/15 bg-white/5 backdrop-blur-2xl shadow-[0_20px_70px_rgba(0,0,0,0.6)] overflow-hidden">
-        
-        {/* Left Panel: Vibrant Multi-Color Feature Card (2 columns) */}
+        {/* Left Panel */}
         <div className="md:col-span-2 p-8 flex flex-col justify-between bg-gradient-to-br from-violet-600 via-fuchsia-600 to-orange-500 text-white">
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/25 backdrop-blur-md text-xs font-semibold tracking-wide">
@@ -50,7 +57,7 @@ export default function RegisterPage() {
               LYSANDER PORTAL
             </div>
 
-            <h2 className="mt-6 text-3xl font-extrabold tracking-tight leading-snug">
+            <h2 className="mt-6 text-3xl font-extrabold tracking-tight leading-snug !text-white !bg-none">
               Build. Connect. Level Up.
             </h2>
             <p className="mt-3 text-sm text-white/90 leading-relaxed">
@@ -70,7 +77,7 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        {/* Right Panel: Form Inputs (3 columns) */}
+        {/* Right Panel */}
         <div className="md:col-span-3 p-8 sm:p-10 bg-slate-950/60">
           <div className="mb-6">
             <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
@@ -82,38 +89,29 @@ export default function RegisterPage() {
           </div>
 
           {error && (
-            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-sm flex items-center gap-2">
-              <span>⚠️</span>
-              <span>{error}</span>
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-sm">
+              {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {success && (
+            <div className="mb-5 p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-sm">
+              {success}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4 !bg-transparent !border-0 !shadow-none !p-0">
             <div>
               <label className="block text-xs font-semibold uppercase tracking-wider text-cyan-300 mb-1.5">
-                Full Name
+                Username
               </label>
               <input
                 type="text"
                 required
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Lysander De Asis"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="lysander31"
                 className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-fuchsia-400 focus:ring-2 focus:ring-fuchsia-500/30 transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-fuchsia-300 mb-1.5">
-                Email
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="lysander@example.com"
-                className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 transition"
               />
             </div>
 

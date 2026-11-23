@@ -1,11 +1,5 @@
 const API_BASE_URL =
-  (typeof globalThis !== "undefined" &&
-    (
-      globalThis as typeof globalThis & {
-        process?: { env?: Record<string, string | undefined> };
-      }
-    ).process?.env?.NEXT_PUBLIC_API_URL) ||
-  "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface RequestOptions extends RequestInit {
   token?: string;
@@ -17,7 +11,6 @@ export async function apiRequest<T = any>(
 ): Promise<T> {
   const { token, headers, ...customConfig } = options;
 
-  // Kunin ang token mula sa parameter o mula sa localStorage (kung nasa browser)
   const authToken =
     token ??
     (typeof window !== "undefined" ? localStorage.getItem("token") : null);
@@ -36,20 +29,17 @@ export async function apiRequest<T = any>(
   }`;
 
   const response = await fetch(url, config);
-
-  // Subukang i-parse ang JSON response kung mayroon
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
     const errorMessage =
-      data?.message || data?.detail || `Request failed (${response.status})`;
+      data?.message || data?.detail || data?.error || `Request failed (${response.status})`;
     throw new Error(errorMessage);
   }
 
   return data as T;
 }
 
-// Helper methods para sa mas madaling paggamit (GET, POST, PUT, DELETE)
 export const api = {
   get: <T = any>(endpoint: string, options?: RequestOptions) =>
     apiRequest<T>(endpoint, { ...options, method: "GET" }),
